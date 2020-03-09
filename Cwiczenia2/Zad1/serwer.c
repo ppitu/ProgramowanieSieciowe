@@ -22,7 +22,11 @@ int main(int argc, char **argv)
 	char sendBuff[1024];
 	int sendBuffSize = sizeof(sendBuff);
 
-	if(1 == sscanf(argv[1], "%d", &port));
+	if(1 != sscanf(argv[1], "%d", &port))
+	{
+		printf("Zly port\n");
+		exit(EXIT_FAILURE);
+	}
 
 	int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
