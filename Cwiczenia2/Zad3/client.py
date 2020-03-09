@@ -1,16 +1,8 @@
 import socket
 import sys
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server_address = ('127.0.0.1', 20124)
-
-sock.connect(server_address)
-
-try:
-	data = sock.recv(4096)
-
-	print(data)
-
-finally:
-	sock.close()
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((sys.argv[1], int(sys.argv[2])))
+#client.send(b'I am CLIENT<br>')
+from_server = client.recv(4096)
+client.close()
+print(from_server)
