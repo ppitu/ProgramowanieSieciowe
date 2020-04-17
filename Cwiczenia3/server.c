@@ -8,8 +8,9 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <ctype.h>
+#include <limits.h>
 
-#define PORT 2021
+#define PORT 2062
 
 int main(int argc, char **argv)
 {
@@ -44,53 +45,93 @@ int main(int argc, char **argv)
 
 	char pomtab[500000] = "";		
 	char send[1024] = "";
-	while((recv_len = recvfrom(socket_desc, (char *)sendBuff, 1024, MSG_WAITALL, (struct sockaddr *)&cli_addr, &clilen)) > 0)
+	while(1)
 	{
 
-		if(recv_len == -1)
+		recv_len = recvfrom(socket_desc, (char *)sendBuff, 1024, MSG_WAITALL, (struct sockaddr *)&cli_addr, &clilen);
 		{
-			printf("recvfrom blad: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-		}
 
-		printf("%s", sendBuff);
+			printf("Receive\n");
 
-		sendBuff[recv_len] = '\0';
-
-		int i = 0;
-		int wynik = 0;
-		int liczba;
-		int z = 0;
-
-		while(sendBuff[i] != '\0')
-		{
-			if(sendBuff[i] == ' ')
+			if(recv_len == -1)
 			{
-				sscanf(pomtab, "%d", &liczba);
-				wynik += liczba;
-				liczba = 0;
-				z = 0;
-				continue;
+				printf("recvfrom blad: %s\n", strerror(errno));
+				exit(EXIT_FAILURE);
 			}
 
-			pomtab[z] = sendBuff[i];
-			z++;
-			i++;
+
+			sendBuff[recv_len] = '\0';
+
+			int i = 0;
+			long wynik = 0;
+			long liczba = 0;
+			int z = 0;
+			int blad = 0;
+
+			while(sendBuff[i] != '\0')
+			{
+				if(sendBuff[i] == ' ')
+				{
+					sscanf(pomtab, "%ld", &liczba);
+					if(liczba >= LONG_MAX || liczba <= LONG_MIN)
+					{
+						blad++;
+					}
+					wynik += liczba;
+
+					if(wynik >= LONG_MAX || wynik <= LONG_MIN)
+					{
+						blad++;
+					}
+
+					liczba = 0;
+					z = 0;
+					i++;
+					memset(pomtab, 0, sizeof(pomtab));
+					continue;
+				}
+				if(blad != 0)
+				{
+					break;
+				}
+
+				pomtab[z] = sendBuff[i];
+				z++;
+				i++;
+			}
+
+
+		
+			sscanf(pomtab, "%ld", &liczba);
+			wynik += liczba;
+
+			if(wynik >= LONG_MAX || wynik <= LONG_MAX)
+			{
+				blad++;
+			}
+
+			if(blad != 0)
+			{
+
+			snprintf(send, sizeof(send), "%ld", wynik);
+			}
+			else {
+				strcpy(send, "Overflow\n");	
+			}
+
+			printf("Send\n");
+
+			int send_len = sendto(socket_desc, (const char *)send, strlen(send), MSG_CONFIRM, (struct sockaddr *)&cli_addr, clilen);
+
+			if(send_len == -1)
+			{
+				printf("sendto blad: %s\n", strerror(errno));
+				exit(EXIT_FAILURE);
+
+			}
+
+
 		}
-
-		
-		snprintf(send, sizeof(send), "%d", wynik);
-		
-		int send_len = sendto(socket_desc, (const char *)send, strlen(send), MSG_CONFIRM, (struct sockaddr *)&cli_addr, clilen);
-
-		if(send_len == -1)
-		{
-			printf("sendto blad: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-
-		}
-
-		
 	}
 	if(close(socket_desc) == -1)
 	{

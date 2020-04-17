@@ -16,8 +16,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}	
 
-	char liczba[20] = "23 7";
-	char liczba1[20];
+	char liczba[22] = "922337203685477580 1";
+	printf("%d", strlen(liczba));
+	char liczba1[22];
 	int port;
 	struct sockaddr_in serv_addr;
 	char buffer[1024];
@@ -56,6 +57,8 @@ int main(int argc, char **argv)
 		printf("Blad sendto: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+
+	printf("Wyslano\n");
 
 	int recvfrom_len = 0;
 
