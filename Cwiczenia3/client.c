@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}	
 
-	char liczba[20];
+	char liczba[20] = "23 7";
 	char liczba1[20];
 	int port;
 	struct sockaddr_in serv_addr;
@@ -45,10 +45,9 @@ int main(int argc, char **argv)
 	socklen_t len = sizeof(serv_addr);
 	
 
-	printf("Podaj pierwsza liczbe: ");
-	scanf("%s", liczba);
-	printf("Podaj druga liczbe: ");
-	scanf("%s", liczba1);
+	/*printf("Podaj pierwsza liczbe: ");
+	scanf("%s", liczba);*/
+
 
 	int sendto_len = sendto(socket_desc, (const char *)liczba, strlen(liczba), MSG_CONFIRM, (struct sockaddr *)&serv_addr, len);
 
@@ -58,19 +57,11 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	int sendto_len1 = sendto(socket_desc, (const char *)liczba1, strlen(liczba1), MSG_CONFIRM, (struct sockaddr *)&serv_addr, len);
-
-	if(sendto_len1 == -1)
-	{
-		printf("Blad sendto: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-
 	int recvfrom_len = 0;
 
 	recvfrom_len = recvfrom(socket_desc, (char *)buffer, 1024, MSG_WAITALL, (struct sockaddr*)&serv_addr, &len);
-	
+
+	buffer[recvfrom_len] = '\0';	
 
 	if(recvfrom_len == -1)
 	{

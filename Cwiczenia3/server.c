@@ -7,8 +7,9 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <ctype.h>
 
-#define PORT 20123
+#define PORT 2021
 
 int main(int argc, char **argv)
 {
@@ -17,7 +18,6 @@ int main(int argc, char **argv)
 	int addrlen = sizeof(serv_addr);
 	socklen_t clilen = sizeof(cli_addr);
 	char sendBuff[1024];
-	//int sendBuffSize = sizeof(sendBuff);
 
 	int socket_desc = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -42,9 +42,8 @@ int main(int argc, char **argv)
 
 	int recv_len = 0;
 
-	int liczba;
-	int liczba1;
-	int i = 0;
+	char pomtab[500000] = "";		
+	char send[1024] = "";
 	while((recv_len = recvfrom(socket_desc, (char *)sendBuff, 1024, MSG_WAITALL, (struct sockaddr *)&cli_addr, &clilen)) > 0)
 	{
 
@@ -54,43 +53,34 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
+		printf("%s", sendBuff);
+
 		sendBuff[recv_len] = '\0';
 
-		/*int i = 0;
-		char liczba[1024];
-		char liczba1[1024];
-		int zmiana = 0;
-		int j = 0;
+		int i = 0;
+		int wynik = 0;
+		int liczba;
+		int z = 0;
 
 		while(sendBuff[i] != '\0')
 		{
-			if(zmiana == 0 && int(sendBuff[i]) > 47 && int(sendBuff[i]) < 58)
+			if(sendBuff[i] == ' ')
 			{
-				liczba[i] = sendBuff[i]
-			}			
+				sscanf(pomtab, "%d", &liczba);
+				wynik += liczba;
+				liczba = 0;
+				z = 0;
+				continue;
+			}
 
-			i++;
-		}*/
-
-		if(i == 0)
-		{
-			liczba = atoi(sendBuff);
-			i++;
-		}
-		else
-		{
-			liczba1 = atoi(sendBuff);
+			pomtab[z] = sendBuff[i];
+			z++;
 			i++;
 		}
 
-		if(i == 2)
-		{
-
-		int wynik = liczba + liczba1;
-		char send[1024];
-		printf("%d\n", wynik);
-		sprintf(send, "%d", wynik);
-
+		
+		snprintf(send, sizeof(send), "%d", wynik);
+		
 		int send_len = sendto(socket_desc, (const char *)send, strlen(send), MSG_CONFIRM, (struct sockaddr *)&cli_addr, clilen);
 
 		if(send_len == -1)
@@ -100,8 +90,7 @@ int main(int argc, char **argv)
 
 		}
 
-		i = 0;
-		}
+		
 	}
 	if(close(socket_desc) == -1)
 	{
