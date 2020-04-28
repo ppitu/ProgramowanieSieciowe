@@ -17,7 +17,7 @@
 #include <netdb.h>
 
 
-/************DECKARATION***************/
+/************DECLARATION***************/
 
 int tcp_listen(const char *host, const char *serv, socklen_t *addrlenp);
 
